@@ -47,7 +47,10 @@ var download = function (url, dest) {
     request.on("error", err => {
       file.close()
       fs.unlink(dest, () => {})
-      reject(err.message)
+      Promise.reject(new Error(err.message)).
+        catch (error => {
+          console.log('caught: ', error.message);
+        })
     })
 
     file.on("finish", () => {
@@ -62,6 +65,11 @@ var download = function (url, dest) {
 
       if (err.code === "EEXIST") {
         Promise.reject(new Error('File already exists')).
+          catch(error => {
+            console.log('caught: ', error.message);
+          })
+      } else if (err.code === "ECONNRESET") {
+        Promise.reject(new Error('Connection hung up')).
           catch(error => {
             console.log('caught: ', error.message);
           })
